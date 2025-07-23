@@ -51,7 +51,9 @@ def load_training_examples(excel_file_path="training_examples.xlsx"):
         return []
 
 
-def create_batch_job_filtering_prompt(jobs_batch, training_examples):
+def create_batch_job_filtering_prompt(
+    jobs_batch, training_examples, max_description_length=4000
+):
     """Create the prompt for DeepSeek to evaluate multiple jobs at once"""
 
     # Base preferences
@@ -78,7 +80,7 @@ Here are examples of my past decisions:
         examples_text += f"""EXAMPLE {i + 1}:
 Title: {example["title"]}
 Company: {example["company"]}
-Description: {example["description"][:250]}...
+Description: {example["description"]}...
 DECISION: {example["decision"]}
 REASON: {example["reason"]}
 
@@ -87,11 +89,14 @@ REASON: {example["reason"]}
     # Multiple jobs to evaluate
     jobs_text = "Now evaluate these jobs:\n\n"
     for i, job in enumerate(jobs_batch):
+        # Use full description up to max_description_length
+        description = job["description"][:max_description_length]
+
         jobs_text += f"""JOB {i + 1}:
 Title: {job["title"]}
 Company: {job["company"]}
 Location: {job.get("location", "N/A")}
-Description: {job["description"][:800]}...
+Description: {description}
 
 """
 
@@ -115,14 +120,18 @@ Description: {job["description"][:800]}...
     return base_prompt + examples_text + jobs_text + response_format
 
 
-def filter_jobs_batch_with_deepseek(jobs_batch, training_examples=None):
+def filter_jobs_batch_with_deepseek(
+    jobs_batch, training_examples=None, max_description_length=4000
+):
     """Use DeepSeek to evaluate multiple jobs at once"""
 
     if training_examples is None:
         training_examples = []
 
     try:
-        prompt = create_batch_job_filtering_prompt(jobs_batch, training_examples)
+        prompt = create_batch_job_filtering_prompt(
+            jobs_batch, training_examples, max_description_length
+        )
 
         # Calculate approximate token count (rough estimate: 4 chars = 1 token)
         estimated_tokens = len(prompt) // 4
@@ -136,7 +145,13 @@ def filter_jobs_batch_with_deepseek(jobs_batch, training_examples=None):
         )
 
         # Parse the JSON response
-        result_text = response.choices[0].message.content.strip()
+        result_text = response.choices[0].message.content
+
+        if result_text is None:
+            print(f"Error: API returned None content. Full response: {response}")
+            raise ValueError("API returned empty content")
+
+        result_text = result_text.strip()
 
         # Clean up response (sometimes models add markdown formatting)
         if result_text.startswith("```json"):
@@ -165,9 +180,19 @@ def filter_jobs_batch_with_deepseek(jobs_batch, training_examples=None):
 
 
 def apply_deepseek_filtering(
-    filtered_jobs, training_file="training_examples.xlsx", batch_size=10
+    filtered_jobs,
+    training_file="training_examples.xlsx",
+    batch_size=10,
+    max_description_length=4000,
 ):
-    """Apply DeepSeek filtering to the jobs dataframe using batch processing"""
+    """Apply DeepSeek filtering to the jobs dataframe using batch processing.
+    Args:
+        filtered_jobs: DataFrame with job data
+        training_file: Path to Excel file with training examples
+        batch_size: Number of jobs to process per API call
+        max_description_length: Maximum characters per job description (upper limit to avoid truncation)
+
+    """
 
     # Load training examples from Excel
     training_examples = load_training_examples(training_file)
@@ -203,7 +228,9 @@ def apply_deepseek_filtering(
         )
 
         # Get results for this batch
-        batch_results = filter_jobs_batch_with_deepseek(batch_jobs, training_examples)
+        batch_results = filter_jobs_batch_with_deepseek(
+            batch_jobs, training_examples, max_description_length
+        )
         all_results.extend(batch_results)
 
     # Add results to dataframe

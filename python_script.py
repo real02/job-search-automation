@@ -57,12 +57,12 @@ def create_batch_job_filtering_prompt(
     """Create the prompt for DeepSeek to evaluate multiple jobs at once"""
 
     # Base preferences
-    base_prompt = """You are a job filtering assistant. I'm a Data & Software Engineer looking for remote contract (B2B) work in Portugal. 
+    base_prompt = """You are a job filtering assistant. I'm a Data & Software Engineer looking for remote contract (B2B) work.
 
 MY PREFERENCES:
 - MUST be fully remote (no hybrid, no on-site), only quaterly (at most) travels are acceptable
 - MUST NOT require data science, machine learning, or AI skills as requirements (only some basic LLM is acceptable, but it shouldn't be primary skill)
-- MUST NOT require C++, Rust, PHP, Ruby, C# as primary languages, nor  require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
+- MUST NOT require C++, Rust, PHP, Ruby, C# as primary languages, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
 - I prefer Python, Go, Java only if it's not the first requiremenet (or if multiple years of experience aren't required), SQL, Docker, Kubernetes, cloud technologies
 - Contract/B2B contract work preferred
 

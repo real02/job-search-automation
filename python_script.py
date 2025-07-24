@@ -325,8 +325,8 @@ print(jobs.head())
 jobs["title"] = jobs["title"].fillna("")
 jobs["description"] = jobs["description"].fillna("")
 filtered_jobs = jobs[
-    # jobs["title"].str.contains("data engineer", case=False, na=False)
-    ~jobs["title"].str.contains(
+    ~jobs["company"].str.contains(r"EPAM Systems|Lumenalta")
+    & ~jobs["title"].str.contains(
         r"azure|c\+\+|rust|php|ruby|spark|databricks|system|cloud engineer|devops|hybrid|on-site",
         case=False,
         na=False,

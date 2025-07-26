@@ -70,13 +70,20 @@ def create_batch_job_filtering_prompt(
     base_prompt = """You are a job filtering assistant. I'm a Data & Software Engineer looking for remote contract (B2B) work.
 
 MY PREFERENCES:
-- MUST be fully remote (no hybrid, no on-site), only quaterly (at most) travels are acceptable
+- MUST be fully remote (no hybrid, no on-site, no 'must be based in _____'), only quaterly (at most) travels are acceptable, and ability to work from anywhere basically. Acceptable is fully remote from European Union, that’s only requirement what I’m open to regarding the location
 - MUST NOT require data science, machine learning, or AI skills as requirements (only some basic LLM is acceptable, but it shouldn't be primary skill)
 - MUST NOT require C++, Rust, PHP, Ruby, C# as primary languages, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
-- I prefer Python, Go, Java only if it's not the first requiremenet (or if multiple years of experience aren't required), SQL, Docker, Kubernetes, cloud technologies
+- I prefer Python, Go, and Java, Java only if it's not the first requiremenet (or if multiple years of experience aren't required), SQL, Docker, Kubernetes, cloud technologies
+- React.js, Typescript, and Javascript are also acceptable
+- All cloud providers (GCP, AWS, Azure) are welcome, but I mainly worked with GCP, and a bit of AWS, then just a bit with Azure, so if some detailed knowledge of Azure is required, and/or Azure is a heavy requirement we should discard that job
 - Contract/B2B contract work preferred
 
 IMPORTANT: If ML/data science/AI is mentioned as "nice to have" or "plus" or "preferred", that's OK - only reject if it's a hard requirement.
+
+LOCATION REQUIREMENTS TO REJECT:
+- Jobs restricted to specific countries/regions I'm not in
+- Portuguese location restrictions: "desde Portugal", "residente em Portugal", "baseado em Portugal", "localizado em Portugal", "apenas Portugal"
+- English location restrictions: "based in [country]", "located in [country]", "from [country]", "residents of [country]"
 
 Here are examples of my past decisions:
 
@@ -310,7 +317,7 @@ applied_ids = (
 
 search_term = "data engineer"
 location = "Portugal"
-job_type = "contract"
+job_type = "fulltime"
 
 ### STEP 2: Scrape new LinkedIn jobs ###
 jobs = scrape_jobs(
@@ -328,8 +335,8 @@ jobs = scrape_jobs(
     job_type=job_type,
     # google_search_term="software engineer jobs near San Francisco, CA since yesterday",
     location=location,
-    results_wanted=20,
-    hours_old=200,
+    results_wanted=50,
+    hours_old=300,
     # country_indeed="USA",
     linkedin_fetch_description=True,  # gets more info such as description, direct job url (slower)
     # proxies=["208.195.175.46:65095", "208.195.175.45:65095", "localhost"],
@@ -337,7 +344,8 @@ jobs = scrape_jobs(
 print(f"Found {len(jobs)} jobs")
 print(f"COLUMNS: {jobs.columns}")
 
-print(jobs)
+pd.set_option("display.width", 1000)
+print(jobs[["company", "title", "location"]])
 
 
 ### STEP 3: Filter out unwanted jobs and previously applied ones ###
@@ -346,7 +354,7 @@ jobs["description"] = jobs["description"].fillna("")
 filtered_jobs = jobs[
     ~jobs["company"].str.contains(r"EPAM Systems|Lumenalta")
     & ~jobs["title"].str.contains(
-        r"azure|c\+\+|rust|php|ruby|spark|databricks|system|cloud engineer|devops|hybrid|on-site",
+        r"azure|c\+\+|rust|php|ruby|c#|spark|databricks|salesforce|ios|android|qa|embedded|system|cloud engineer|devops|machine learning|data scientist|principal|junior|hybrid|on-site|relocation",
         case=False,
         na=False,
     )

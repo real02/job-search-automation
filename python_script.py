@@ -299,6 +299,10 @@ applied_ids = (
     .tolist()
 )
 
+search_term = "data engineer"  # Extract this from your scrape_jobs call
+location = "Portugal"  # Extract this from your scrape_jobs call
+job_type = "contract"
+
 ### STEP 2: Scrape new LinkedIn jobs ###
 jobs = scrape_jobs(
     site_name=[
@@ -310,11 +314,11 @@ jobs = scrape_jobs(
         # "bayt",
         # "naukri",
     ],
-    search_term="golang",
+    search_term=search_term,
     is_remote=True,
-    job_type="contract",
+    job_type=job_type,
     # google_search_term="software engineer jobs near San Francisco, CA since yesterday",
-    location="Portugal",
+    location=location,
     results_wanted=20,
     hours_old=200,
     # country_indeed="USA",
@@ -322,7 +326,10 @@ jobs = scrape_jobs(
     # proxies=["208.195.175.46:65095", "208.195.175.45:65095", "localhost"],
 )
 print(f"Found {len(jobs)} jobs")
-print(jobs.head())
+print(f"COLUMNS: {jobs.columns}")
+
+print(jobs)
+
 
 ### STEP 3: Filter out unwanted jobs and previously applied ones ###
 jobs["title"] = jobs["title"].fillna("")
@@ -363,9 +370,10 @@ filtered_jobs = filtered_jobs[~pd.Series(filtered_jobs["job_id"]).isin(applied_i
 print("AFTER EXCLUDING ALREADY APPLIED JOBS")
 print(filtered_jobs)
 
-# NEW: Apply DeepSeek filtering
-final_jobs = apply_deepseek_filtering(filtered_jobs, "training_examples.xlsx")
-
+# Apply DeepSeek filtering
+final_jobs = apply_deepseek_filtering(
+    filtered_jobs, "teaching_ai_how_i_filter_jobs.xlsx"
+)
 
 ### STEP 4: Format output to match your spreadsheet schema ###
 output_df = pd.DataFrame(
@@ -380,9 +388,13 @@ output_df = pd.DataFrame(
     }
 )
 
+clean_search_term = search_term.lower().replace(" ", "_")
+clean_location = location.lower().replace(" ", "_")
+clean_job_type = job_type.lower().replace(" ", "_")
+filename = f"careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
 
 output_df.to_csv(
-    f"careerflow_new_jobs_{date.today().strftime('%d-%m-%Y')}.csv",
+    filename,
     mode="a",
     quoting=csv.QUOTE_NONNUMERIC,
     escapechar="\\",

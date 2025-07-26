@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import pandas as pd
+import random
 import re
 
 from datetime import date
@@ -73,10 +74,12 @@ Here are examples of my past decisions:
 """
 
     # Add training examples from Excel
+    selected_examples = random.sample(
+        training_examples, min(8, len(training_examples))
+    )  # Use fewer examples to save tokens for multiple jobs
+
     examples_text = ""
-    for i, example in enumerate(
-        training_examples[:8]
-    ):  # Use fewer examples to save tokens for multiple jobs
+    for i, example in enumerate(selected_examples):
         examples_text += f"""EXAMPLE {i + 1}:
 Title: {example["title"]}
 Company: {example["company"]}

@@ -20,13 +20,22 @@ client = OpenAI(
 )
 
 
-def load_training_examples(excel_file_path="training_examples.xlsx"):
+def load_training_examples(excel_file_path="teaching_ai_how_i_filter_jobs.xlsx"):
     """Load training examples from Excel file"""
     try:
-        df = pd.read_excel(excel_file_path)
+        df = pd.read_excel(excel_file_path, header=1)
 
         # Validate required columns
-        required_cols = ["Job Title", "Company", "Description", "Decision", "Reason"]
+        required_cols = [
+            "Job Title",
+            "Company",
+            "Job Description",
+            "KEEP/DISCARD",
+            "My reasoning",
+        ]
+
+        print(f"FREAKING DF COLUMNS: {df.columns}")
+
         missing_cols = [col for col in required_cols if col not in df.columns]
         if missing_cols:
             raise ValueError(f"Missing columns in Excel: {missing_cols}")
@@ -38,9 +47,9 @@ def load_training_examples(excel_file_path="training_examples.xlsx"):
                 {
                     "title": str(row["Job Title"]),
                     "company": str(row["Company"]),
-                    "description": str(row["Description"]),
-                    "decision": str(row["Decision"]).upper(),
-                    "reason": str(row["Reason"]),
+                    "description": str(row["Job Description"]),
+                    "decision": str(row["KEEP/DISCARD"]).upper(),
+                    "reason": str(row["My reasoning"]),
                 }
             )
 
@@ -184,7 +193,7 @@ def filter_jobs_batch_with_deepseek(
 
 def apply_deepseek_filtering(
     filtered_jobs,
-    training_file="training_examples.xlsx",
+    training_file="teaching_ai_how_i_filter_jobs.xlsx",
     batch_size=10,
     max_description_length=4000,
 ):
@@ -257,7 +266,7 @@ def apply_deepseek_filtering(
 
     # Show some examples of decisions
     print("\nSample decisions:")
-    for i, result in enumerate(all_results[:3]):
+    for i, result in enumerate(all_results):
         job_title = filtered_jobs.iloc[i]["title"][:50]
         print(f"  '{job_title}...' → {result['decision']}: {result['reason']}")
 
@@ -299,8 +308,8 @@ applied_ids = (
     .tolist()
 )
 
-search_term = "data engineer"  # Extract this from your scrape_jobs call
-location = "Portugal"  # Extract this from your scrape_jobs call
+search_term = "data engineer"
+location = "Portugal"
 job_type = "contract"
 
 ### STEP 2: Scrape new LinkedIn jobs ###

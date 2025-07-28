@@ -87,6 +87,8 @@ LOCATION REQUIREMENTS TO REJECT:
 - Portuguese location restrictions: "desde Portugal", "residente em Portugal", "baseado em Portugal", "localizado em Portugal", "apenas Portugal"
 - English location restrictions: "based in [country]", "located in [country]", "from [country]", "residents of [country]"
 
+If it doesn't explicitly say that the job location is restricted to one specific country or combination of countries, then we should keep that job post.
+
 Here are examples of my past decisions:
 
 """

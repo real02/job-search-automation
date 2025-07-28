@@ -4,12 +4,14 @@ import os
 import pandas as pd
 import random
 import re
+import time
 
 from datetime import date
 from dotenv import load_dotenv
 from openai import OpenAI
 from urllib.parse import urlparse, parse_qs
 from jobspy import scrape_jobs
+
 
 # Load environment variables
 load_dotenv()
@@ -274,8 +276,8 @@ def apply_deepseek_filtering(
     # Show some examples of decisions
     print("\nSample decisions:")
     for i, result in enumerate(all_results):
-        job_title = filtered_jobs.iloc[i]["title"][:50]
-        print(f"  '{job_title}...' → {result['decision']}: {result['reason']}")
+        job_url = filtered_jobs.iloc[i]["job_url"][:50]
+        print(f"  '{job_url}...' → {result['decision']}: {result['reason']}")
 
     return final_jobs
 
@@ -316,8 +318,11 @@ applied_ids = (
 )
 
 search_term = "data engineer"
-location = "European Union"
+location = "Poland"
 job_type = "fulltime"
+
+print("🚀 Starting job scraping and filtering process...")
+start_time = time.perf_counter()
 
 ### STEP 2: Scrape new LinkedIn jobs ###
 jobs = scrape_jobs(
@@ -335,7 +340,7 @@ jobs = scrape_jobs(
     job_type=job_type,
     # google_search_term="software engineer jobs near San Francisco, CA since yesterday",
     location=location,
-    results_wanted=50,
+    results_wanted=100,
     hours_old=300,
     # country_indeed="USA",
     linkedin_fetch_description=True,  # gets more info such as description, direct job url (slower)
@@ -408,7 +413,11 @@ output_df = pd.DataFrame(
 clean_search_term = search_term.lower().replace(" ", "_")
 clean_location = location.lower().replace(" ", "_")
 clean_job_type = job_type.lower().replace(" ", "_")
-filename = f"./new-jobs-{date.today()}/careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
+
+# Create the folder if it doesn't exist
+date_folder = f"./new-jobs-{date.today()}"
+os.makedirs(date_folder, exist_ok=True)
+filename = f"{date_folder}/careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
 
 output_df.to_csv(
     filename,
@@ -419,3 +428,9 @@ output_df.to_csv(
 )  # to_excel
 
 print(f"{len(output_df)} NEW JOBS FOUND and exported.")
+
+end_time = time.perf_counter()
+total_time = end_time - start_time
+print(
+    f"⏱️  Total execution time: {total_time:.2f} seconds ({total_time / 60:.2f} minutes)"
+)

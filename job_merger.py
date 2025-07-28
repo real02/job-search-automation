@@ -32,6 +32,8 @@ class JobFilesMerger:
         self.locations = [
             "Poland",
             "Portugal",
+            "Belgium",
+            "Hungary",
             "United Kingdom",
             "Romania",
             "Croatia",

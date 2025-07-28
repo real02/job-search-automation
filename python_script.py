@@ -316,7 +316,7 @@ applied_ids = (
 )
 
 search_term = "data engineer"
-location = "Portugal"
+location = "European Union"
 job_type = "fulltime"
 
 ### STEP 2: Scrape new LinkedIn jobs ###
@@ -408,7 +408,7 @@ output_df = pd.DataFrame(
 clean_search_term = search_term.lower().replace(" ", "_")
 clean_location = location.lower().replace(" ", "_")
 clean_job_type = job_type.lower().replace(" ", "_")
-filename = f"careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
+filename = f"./new-jobs-{date.today()}/careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
 
 output_df.to_csv(
     filename,

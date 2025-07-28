@@ -133,7 +133,7 @@ class JobFilesMerger:
             target_date = date.today().strftime("%d-%m-%Y")
 
         if output_filename is None:
-            output_filename = f"careerflow_merged_jobs_{target_date}.csv"
+            output_filename = f"careerflow_merged_jobs_{target_date}.xlsx"
 
         # Find all existing files
         existing_files = self.find_existing_files(target_date)
@@ -203,9 +203,7 @@ class JobFilesMerger:
         os.makedirs(date_folder, exist_ok=True)
 
         output_path = os.path.join(date_folder, output_filename)
-        combined_df.to_csv(
-            output_path, quoting=csv.QUOTE_NONNUMERIC, escapechar="\\", index=False
-        )
+        combined_df.to_excel(output_path, index=False)
 
         # Print summary
         print(f"\n✅ Merge completed!")

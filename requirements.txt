@@ -2,3 +2,4 @@ python-jobspy
 jobsparser
 openai
 python-dotenv
+openpyxl

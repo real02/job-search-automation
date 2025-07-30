@@ -311,14 +311,14 @@ def extract_job_id(job_link):
     return None
 
 
-careerflow_df = pd.read_excel("./careerflow-jobs-updated.xlsx")
+careerflow_df = pd.read_excel("./careerflow_updated_new.xlsx")
 careerflow_df["Job Link"] = careerflow_df["Job Link"].dropna().astype(str)
 applied_or_saved_df = careerflow_df[
-    (careerflow_df["Status"] == "Applied" | careerflow_df["Status"] == "Saved")
+    ((careerflow_df["Status"] == "Applied") | (careerflow_df["Status"] == "Saved"))
     & careerflow_df["Job Link"].str.startswith("https://www.linkedin.com")
 ]
 
-applied_ids = (
+applied_or_saved_ids = (
     pd.Series(applied_or_saved_df["Job Link"])
     .apply(extract_job_id)
     .dropna()
@@ -396,8 +396,10 @@ print("AFTER ADDING job_id TO THE DATA FRAME")
 print(filtered_jobs)
 
 
-# Exclude already-applied jobs
-filtered_jobs = filtered_jobs[~pd.Series(filtered_jobs["job_id"]).isin(applied_ids)]
+# Exclude already-applied/saved jobs
+filtered_jobs = filtered_jobs[
+    ~pd.Series(filtered_jobs["job_id"]).isin(applied_or_saved_ids)
+]
 
 print("AFTER EXCLUDING ALREADY APPLIED JOBS")
 print(filtered_jobs)

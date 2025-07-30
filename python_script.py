@@ -74,7 +74,7 @@ def create_batch_job_filtering_prompt(
 MY PREFERENCES:
 - MUST be fully remote (no hybrid, no on-site, no 'must be based in _____'), only quaterly (at most) travels are acceptable, and ability to work from anywhere basically. Acceptable is fully remote from European Union, that’s only requirement what I’m open to regarding the location
 - MUST NOT require data science, machine learning, or AI skills as requirements (only some basic LLM is acceptable, but it shouldn't be primary skill)
-- MUST NOT require C++, Rust, PHP, Ruby, C# as primary languages, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
+- MUST NOT require C++, Rust, PHP, Ruby, C#, Node.js as primary languages, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
 - I prefer Python, Go, and Java, Java only if it's not the first requiremenet (or if multiple years of experience aren't required), SQL, Docker, Kubernetes, cloud technologies
 - React.js, Typescript, and Javascript are also acceptable
 - All cloud providers (GCP, AWS, Azure) are welcome, but I mainly worked with GCP, and a bit of AWS, then just a bit with Azure, so if some detailed knowledge of Azure is required, and/or Azure is a heavy requirement we should discard that job
@@ -82,12 +82,20 @@ MY PREFERENCES:
 
 IMPORTANT: If ML/data science/AI is mentioned as "nice to have" or "plus" or "preferred", that's OK - only reject if it's a hard requirement.
 
+Discard any job posts that require:
+- deep expertise and multiple years of experience in data analytics
+- QA Automation Engineer roles
+
 LOCATION REQUIREMENTS TO REJECT:
 - Jobs restricted to specific countries/regions I'm not in
 - Portuguese location restrictions: "desde Portugal", "residente em Portugal", "baseado em Portugal", "localizado em Portugal", "apenas Portugal"
 - English location restrictions: "based in [country]", "located in [country]", "from [country]", "residents of [country]"
 
-If it doesn't explicitly say that the job location is restricted to one specific country or combination of countries, then we should keep that job post.
+If it doesn't explicitly say that the job location is restricted to one specific country or combination of countries, and
+if it mentions flexible working environment, remote work with the freedom of choice between office and remote setting, then we should keep that job post.
+So don't discard it only unless there is explicit location-bound requirement mentioned in the job description. If it says 'Poland (Remote)', you shouldn't
+discard that job based on that only.
+Moreover, if it doesn't explicitly state that it's fully remote/fully remote from anywhere in the EU, still keep that job.
 
 Here are examples of my past decisions:
 
@@ -305,13 +313,13 @@ def extract_job_id(job_link):
 
 careerflow_df = pd.read_excel("./careerflow-jobs-updated.xlsx")
 careerflow_df["Job Link"] = careerflow_df["Job Link"].dropna().astype(str)
-applied_df = careerflow_df[
-    (careerflow_df["Status"] == "Applied")
+applied_or_saved_df = careerflow_df[
+    (careerflow_df["Status"] == "Applied" | careerflow_df["Status"] == "Saved")
     & careerflow_df["Job Link"].str.startswith("https://www.linkedin.com")
 ]
 
 applied_ids = (
-    pd.Series(applied_df["Job Link"])
+    pd.Series(applied_or_saved_df["Job Link"])
     .apply(extract_job_id)
     .dropna()
     .astype(str)
@@ -319,7 +327,7 @@ applied_ids = (
     .tolist()
 )
 
-search_term = "data engineer"
+search_term = "golang"
 location = "Poland"
 job_type = "fulltime"
 
@@ -361,12 +369,12 @@ jobs["description"] = jobs["description"].fillna("")
 filtered_jobs = jobs[
     ~jobs["company"].str.contains(r"EPAM Systems|Lumenalta")
     & ~jobs["title"].str.contains(
-        r"azure|c\+\+|rust|php|ruby|c#|spark|databricks|salesforce|ios|android|qa|embedded|system|cloud engineer|devops|machine learning|data scientist|principal|junior|hybrid|on-site|relocation",
+        r"azure|c\+\+|rust|php|ruby|c#|.NET|spark|databricks|salesforce|react-native|ios|android|kotlin|java developer|Front-End Developer|Front-end Software Engineer|Front-End Engineer|qa|embedded|system|cloud engineer|devops|machine learning|data scientist|principal|staff|junior|hybrid|on-site|relocation",
         case=False,
         na=False,
     )
     & ~jobs["description"].str.contains(
-        r"c\+\+|rust|spark|pyspark|databricks|ruby|php",
+        r"c\+\+|rust|spark|pyspark|databricks|ruby|php|.NET",
         case=False,
         na=False,
     )
@@ -417,7 +425,7 @@ clean_location = location.lower().replace(" ", "_")
 clean_job_type = job_type.lower().replace(" ", "_")
 
 # Create the folder if it doesn't exist
-date_folder = f"./new-jobs-{date.today()}"
+date_folder = f"./new-jobs-{date.today().strftime('%d-%m-%Y')}"
 os.makedirs(date_folder, exist_ok=True)
 filename = f"{date_folder}/careerflow_new_jobs_{clean_search_term}_{clean_location}_{clean_job_type}_{date.today().strftime('%d-%m-%Y')}.csv"
 

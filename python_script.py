@@ -74,7 +74,7 @@ def create_batch_job_filtering_prompt(
 MY PREFERENCES:
 - MUST be fully remote (no hybrid, no on-site, no 'must be based in _____'), only quaterly (at most) travels are acceptable, and ability to work from anywhere basically. Acceptable is fully remote from European Union, that’s only requirement what I’m open to regarding the location
 - MUST NOT require data science, machine learning, or AI skills as requirements (only some basic LLM is acceptable, but it shouldn't be primary skill)
-- MUST NOT require C++, Rust, PHP, Ruby, C#, Node.js as primary languages, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
+- MUST NOT require C++, Rust, PHP, Ruby, C#, Node.js as primary languages or requiring strong profficiency in them, nor require Django and Flask as primary Python framework, FastAPI is acceptable as primary framework
 - I prefer Python, Go, and Java, Java only if it's not the first requiremenet (or if multiple years of experience aren't required), SQL, Docker, Kubernetes, cloud technologies
 - React.js, Typescript, and Javascript are also acceptable
 - All cloud providers (GCP, AWS, Azure) are welcome, but I mainly worked with GCP, and a bit of AWS, then just a bit with Azure, so if some detailed knowledge of Azure is required, and/or Azure is a heavy requirement we should discard that job
@@ -327,9 +327,9 @@ applied_or_saved_ids = (
     .tolist()
 )
 
-search_term = "golang"
-location = "Poland"
-job_type = "fulltime"
+search_term = "software engineer"
+location = "Romania"
+job_type = "contract"
 
 print("🚀 Starting job scraping and filtering process...")
 start_time = time.perf_counter()
@@ -367,7 +367,7 @@ print(jobs[["company", "title", "location"]])
 jobs["title"] = jobs["title"].fillna("")
 jobs["description"] = jobs["description"].fillna("")
 filtered_jobs = jobs[
-    ~jobs["company"].str.contains(r"EPAM Systems|Lumenalta")
+    ~jobs["company"].str.contains(r"EPAM Systems|Lumenalta|Revolut|Canonical")
     & ~jobs["title"].str.contains(
         r"azure|c\+\+|rust|php|ruby|c#|.NET|spark|databricks|salesforce|react-native|ios|android|kotlin|java developer|Front-End Developer|Front-end Software Engineer|Front-End Engineer|qa|embedded|system|cloud engineer|devops|machine learning|data scientist|principal|staff|junior|hybrid|on-site|relocation",
         case=False,
